@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import androidx.annotation.CheckResult;
 import androidx.annotation.DrawableRes;
@@ -643,10 +644,12 @@ public class RequestManager
     // the corresponding Activity or Fragment is destroyed because retaining any reference to the
     // RequestManager leaks memory. It's possible that there's some brief period of time during or
     // immediately after onDestroy where this is reasonable, but I can't think of why.
+    Log.e("test","判断是否移除旧的request--》"+isOwnedByUs+"-----"+(glide.removeFromManagers(target))+"---"+(target.getRequest()));
     Request request = target.getRequest();
     if (!isOwnedByUs && !glide.removeFromManagers(target) && request != null) {
       target.setRequest(null);
       request.clear();
+      Log.e("test","移除旧的request");
     }
   }
 

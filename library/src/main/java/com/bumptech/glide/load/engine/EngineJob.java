@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.util.Log;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -261,6 +262,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     for (final ResourceCallbackAndExecutor entry : copy) {
       entry.executor.execute(new CallResourceReady(entry.cb));
     }
+    Log.e("test","减少一个延迟回调");
     decrementPendingCallbacks();
   }
 
@@ -283,6 +285,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
       int decremented = pendingCallbacks.decrementAndGet();
       Preconditions.checkArgument(decremented >= 0, "Can't decrement below 0");
       if (decremented == 0) {
+        Log.e("test","回调为0");
         toRelease = engineResource;
 
         release();

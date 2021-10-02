@@ -37,6 +37,7 @@ public class SupportRequestManagerFragment extends Fragment {
 
   public SupportRequestManagerFragment() {
     this(new ActivityFragmentLifecycle());
+    Log.e("fragment1","创建支持的SupportFragment");
   }
 
   @VisibleForTesting
@@ -195,6 +196,7 @@ public class SupportRequestManagerFragment extends Fragment {
     super.onDetach();
     parentFragmentHint = null;
     unregisterFragmentWithRoot();
+    Log.e("fragment1","支持fragment-->OnDetach");
   }
 
   @Override
@@ -212,6 +214,7 @@ public class SupportRequestManagerFragment extends Fragment {
   @Override
   public void onDestroy() {
     super.onDestroy();
+    Log.e("fragment1","支持fragment-->OnDestroy");
     lifecycle.onDestroy();
     unregisterFragmentWithRoot();
   }

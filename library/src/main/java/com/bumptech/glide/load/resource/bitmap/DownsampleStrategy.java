@@ -178,6 +178,8 @@ public abstract class DownsampleStrategy {
     @Override
     public float getScaleFactor(
         int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
+      //获取源高，源宽，请求高请求宽，求出最小的缩放因子
+      //
       float widthPercentage = requestedWidth / (float) sourceWidth;
       float heightPercentage = requestedHeight / (float) sourceHeight;
       return Math.max(widthPercentage, heightPercentage);

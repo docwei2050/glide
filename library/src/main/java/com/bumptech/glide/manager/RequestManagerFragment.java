@@ -46,6 +46,7 @@ public class RequestManagerFragment extends Fragment {
 
   public RequestManagerFragment() {
     this(new ActivityFragmentLifecycle());
+    Log.e("fragment1","创建普通的SupportFragment");
   }
 
   @VisibleForTesting

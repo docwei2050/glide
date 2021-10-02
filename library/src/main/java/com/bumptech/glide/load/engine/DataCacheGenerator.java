@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
@@ -54,6 +55,7 @@ class DataCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallba
       // and the actions it performs are much more expensive than a single allocation.
       @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
       Key originalKey = new DataCacheKey(sourceId, helper.getSignature());
+      Log.e("test","缓存数据到disk from DataCacheGenerator-->"+sourceId);
       cacheFile = helper.getDiskCache().get(originalKey);
       if (cacheFile != null) {
         this.sourceKey = sourceId;
@@ -66,12 +68,11 @@ class DataCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallba
     boolean started = false;
     while (!started && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
-      loadData =
-          modelLoader.buildLoadData(
-              cacheFile, helper.getWidth(), helper.getHeight(), helper.getOptions());
+      loadData = modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(), helper.getOptions());
       if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
         started = true;
         loadData.fetcher.loadData(helper.getPriority(), this);
+        Log.e("test","DataCacheGenerator-->再次回调ok");
       }
     }
     return started;

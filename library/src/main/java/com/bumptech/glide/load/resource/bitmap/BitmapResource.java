@@ -59,6 +59,7 @@ public class BitmapResource implements Resource<Bitmap>, Initializable {
 
   @Override
   public void initialize() {
+    //预先将bitmap加载到gpu上
     bitmap.prepareToDraw();
   }
 }

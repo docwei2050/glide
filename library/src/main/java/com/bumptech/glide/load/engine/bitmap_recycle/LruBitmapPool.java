@@ -306,8 +306,10 @@ public class LruBitmapPool implements BitmapPool {
   private static LruPoolStrategy getDefaultStrategy() {
     final LruPoolStrategy strategy;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      //高版本就是size config做key
       strategy = new SizeConfigStrategy();
     } else {
+      //低版本严格按照宽高config做key的
       strategy = new AttributeStrategy();
     }
     return strategy;

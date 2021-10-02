@@ -82,7 +82,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
         Preconditions.checkNotNull(byteArrayPool));
   }
-
+  //读取直接缓冲流里面开始的2个字节，
   @NonNull
   private ImageType getType(Reader reader) throws IOException {
     try {

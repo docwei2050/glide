@@ -61,6 +61,7 @@ public final class Downsampler {
    * <p>Refer to {@link PreferredColorSpace} for details on how this option works and its various
    * limitations.
    */
+  //色域标准
   public static final Option<PreferredColorSpace> PREFERRED_COLOR_SPACE =
       Option.memory(
           "com.bumptech.glide.load.resource.bitmap.Downsampler.PreferredColorSpace",
@@ -289,7 +290,7 @@ public final class Downsampler {
     if (sourceWidth == -1 || sourceHeight == -1) {
       isHardwareConfigAllowed = false;
     }
-
+    //判断图片的朝向 是否需要旋转
     int orientation = imageReader.getImageOrientation();
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
     boolean isExifOrientationRequired = TransformationUtils.isExifOrientationRequired(orientation);

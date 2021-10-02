@@ -20,7 +20,7 @@ public class ByteBufferBitmapDecoder implements ResourceDecoder<ByteBuffer, Bitm
 
   @Override
   public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) {
-    return downsampler.handles(source);
+    return true;
   }
 
   @Override
@@ -31,3 +31,20 @@ public class ByteBufferBitmapDecoder implements ResourceDecoder<ByteBuffer, Bitm
     return downsampler.decode(is, width, height, options);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

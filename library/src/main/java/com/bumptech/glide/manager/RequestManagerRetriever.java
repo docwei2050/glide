@@ -93,6 +93,7 @@ public class RequestManagerRetriever implements Handler.Callback {
         : new FirstFrameWaiter();
   }
 
+  //application的是单例ApplicationManager
   @NonNull
   private RequestManager getApplicationManager(@NonNull Context context) {
     // Either an application context or we're on a background thread.
@@ -186,10 +187,31 @@ public class RequestManagerRetriever implements Handler.Callback {
       return fragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }
   }
-
   @SuppressWarnings("deprecation")
   @NonNull
   public RequestManager get(@NonNull View view) {
+    if (Util.isOnBackgroundThread()) {
+      return get(view.getContext().getApplicationContext());
+    }
+    Activity activity = findActivity(view.getContext());
+    if (activity == null) {
+      return get(view.getContext().getApplicationContext());
+    }
+    if (activity instanceof FragmentActivity) {
+      Fragment fragment = findSupportFragment(view, (FragmentActivity) activity);
+      return fragment != null ? get(fragment) : get((FragmentActivity) activity);
+    }
+    android.app.Fragment fragment = findFragment(view, activity);
+    if (fragment == null) {
+      return get(activity);
+    }
+    return get(fragment);
+
+  }
+
+  @SuppressWarnings("deprecation")
+  @NonNull
+  public RequestManager get2(@NonNull View view) {
     if (Util.isOnBackgroundThread()) {
       return get(view.getContext().getApplicationContext());
     }
@@ -211,8 +233,6 @@ public class RequestManagerRetriever implements Handler.Callback {
       Fragment fragment = findSupportFragment(view, (FragmentActivity) activity);
       return fragment != null ? get(fragment) : get((FragmentActivity) activity);
     }
-
-    // Standard Fragments.
     android.app.Fragment fragment = findFragment(view, activity);
     if (fragment == null) {
       return get(activity);
@@ -427,7 +447,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   @NonNull
   SupportRequestManagerFragment getSupportRequestManagerFragment(FragmentManager fragmentManager) {
-    return getSupportRequestManagerFragment(fragmentManager, /*parentHint=*/ null);
+    return getSupportRequestManagerFragment( fragmentManager, /*parentHint=*/ null);
   }
 
   private static boolean isActivityVisible(Context context) {
@@ -440,8 +460,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   @NonNull
   private SupportRequestManagerFragment getSupportRequestManagerFragment(
       @NonNull final FragmentManager fm, @Nullable Fragment parentHint) {
-    SupportRequestManagerFragment current =
-        (SupportRequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+    SupportRequestManagerFragment current = (SupportRequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
     if (current == null) {
       current = pendingSupportRequestManagerFragments.get(fm);
       if (current == null) {
@@ -449,6 +468,7 @@ public class RequestManagerRetriever implements Handler.Callback {
         current.setParentFragmentHint(parentHint);
         pendingSupportRequestManagerFragments.put(fm, current);
         fm.beginTransaction().add(current, FRAGMENT_TAG).commitAllowingStateLoss();
+        //及时在map中移除这个Fragment
         handler.obtainMessage(ID_REMOVE_SUPPORT_FRAGMENT_MANAGER, fm).sendToTarget();
       }
     }
@@ -466,9 +486,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     if (requestManager == null) {
       // TODO(b/27524013): Factor out this Glide.get() call.
       Glide glide = Glide.get(context);
-      requestManager =
-          factory.build(
-              glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);
+      requestManager = factory.build(glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);
       // This is a bit of hack, we're going to start the RequestManager, but not the
       // corresponding Lifecycle. It's safe to start the RequestManager, but starting the
       // Lifecycle might trigger memory leaks. See b/154405040
@@ -486,12 +504,14 @@ public class RequestManagerRetriever implements Handler.Callback {
     Object removed = null;
     Object key = null;
     switch (message.what) {
+      //移除Fragment
       case ID_REMOVE_FRAGMENT_MANAGER:
         android.app.FragmentManager fm = (android.app.FragmentManager) message.obj;
         key = fm;
         removed = pendingRequestManagerFragments.remove(fm);
         break;
       case ID_REMOVE_SUPPORT_FRAGMENT_MANAGER:
+        //移除Fragment
         FragmentManager supportFm = (FragmentManager) message.obj;
         key = supportFm;
         removed = pendingSupportRequestManagerFragments.remove(supportFm);

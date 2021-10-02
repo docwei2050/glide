@@ -1,6 +1,7 @@
 package com.bumptech.glide.samples.flickr.api;
 
 import android.content.Context;
+import android.util.Log;
 import android.util.SparseArray;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -118,6 +119,7 @@ public final class Api {
       result = photo.getPartialUrl() + sizeKey + ".jpg";
       CACHED_URLS.put(entry, result);
     }
+    Log.d("url",result);
     return result;
   }
 

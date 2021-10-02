@@ -125,10 +125,8 @@ public abstract class DiskCacheStrategy {
         }
 
         @Override
-        public boolean isResourceCacheable(
-            boolean isFromAlternateCacheKey, DataSource dataSource, EncodeStrategy encodeStrategy) {
-          return ((isFromAlternateCacheKey && dataSource == DataSource.DATA_DISK_CACHE)
-                  || dataSource == DataSource.LOCAL)
+        public boolean isResourceCacheable(boolean isFromAlternateCacheKey, DataSource dataSource, EncodeStrategy encodeStrategy) {
+          return ((isFromAlternateCacheKey && dataSource == DataSource.DATA_DISK_CACHE) || dataSource == DataSource.LOCAL)
               && encodeStrategy == EncodeStrategy.TRANSFORMED;
         }
 

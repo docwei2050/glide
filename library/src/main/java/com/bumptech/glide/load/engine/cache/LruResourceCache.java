@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.load.Key;
@@ -29,6 +30,7 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
   protected void onItemEvicted(@NonNull Key key, @Nullable Resource<?> item) {
     if (listener != null && item != null) {
       listener.onResourceRemoved(item);
+      Log.e("test","移除最近最少使用的---》"+key.toString());
     }
   }
 

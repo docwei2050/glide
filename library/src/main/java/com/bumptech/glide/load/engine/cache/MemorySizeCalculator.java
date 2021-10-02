@@ -46,7 +46,7 @@ public final class MemorySizeCalculator {
     int widthPixels = builder.screenDimensions.getWidthPixels();
     int heightPixels = builder.screenDimensions.getHeightPixels();
     int screenSize = widthPixels * heightPixels * BYTES_PER_ARGB_8888_PIXEL;
-
+    //8及其8以上4张图图片的大小，以下就1张图片大小
     int targetBitmapPoolSize = Math.round(screenSize * builder.bitmapPoolScreens);
 
     int targetMemoryCacheSize = Math.round(screenSize * builder.memoryCacheScreens);
@@ -55,12 +55,15 @@ public final class MemorySizeCalculator {
     if (targetMemoryCacheSize + targetBitmapPoolSize <= availableSize) {
       memoryCacheSize = targetMemoryCacheSize;
       bitmapPoolSize = targetBitmapPoolSize;
+
     } else {
       float part = availableSize / (builder.bitmapPoolScreens + builder.memoryCacheScreens);
       memoryCacheSize = Math.round(part * builder.memoryCacheScreens);
       bitmapPoolSize = Math.round(part * builder.bitmapPoolScreens);
     }
-
+    //LruCache就2张图片大小
+    Log.e("test","bitmap池--->size"+bitmapPoolSize);
+    Log.e("test","bitmap池--->size"+ memoryCacheSize);
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       Log.d(
           TAG,

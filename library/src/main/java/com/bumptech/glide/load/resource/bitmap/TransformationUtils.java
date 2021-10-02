@@ -135,10 +135,12 @@ public final class TransformationUtils {
     Bitmap result = pool.get(width, height, getNonNullConfig(inBitmap));
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
     TransformationUtils.setAlpha(inBitmap, result);
-
+    Log.e("test","转换时两个Bitmap大小--》result"+result.getByteCount()+"------"+inBitmap.getByteCount());
     applyMatrix(inBitmap, result, m);
+    Log.e("test","转换时后的Bitmap--》result"+result.getByteCount());
     return result;
   }
+
 
   /**
    * An expensive operation to resize the given Bitmap down so that it fits within the given
@@ -314,24 +316,17 @@ public final class TransformationUtils {
     if (!isExifOrientationRequired(exifOrientation)) {
       return inBitmap;
     }
-
     final Matrix matrix = new Matrix();
     initializeMatrixForRotation(exifOrientation, matrix);
-
     // From Bitmap.createBitmap.
     final RectF newRect = new RectF(0, 0, inBitmap.getWidth(), inBitmap.getHeight());
     matrix.mapRect(newRect);
-
     final int newWidth = Math.round(newRect.width());
     final int newHeight = Math.round(newRect.height());
-
     Bitmap.Config config = getNonNullConfig(inBitmap);
     Bitmap result = pool.get(newWidth, newHeight, config);
-
     matrix.postTranslate(-newRect.left, -newRect.top);
-
     result.setHasAlpha(inBitmap.hasAlpha());
-
     applyMatrix(inBitmap, result, matrix);
     return result;
   }
@@ -535,18 +530,13 @@ public final class TransformationUtils {
         });
   }
 
-  private static Bitmap roundedCorners(
-      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, DrawRoundedCornerFn drawRoundedCornerFn) {
-
+  private static Bitmap roundedCorners(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, DrawRoundedCornerFn drawRoundedCornerFn) {
     // Alpha is required for this transformation.
     Bitmap.Config safeConfig = getAlphaSafeConfig(inBitmap);
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
     Bitmap result = pool.get(toTransform.getWidth(), toTransform.getHeight(), safeConfig);
-
     result.setHasAlpha(true);
-
-    BitmapShader shader =
-        new BitmapShader(toTransform, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+    BitmapShader shader = new BitmapShader(toTransform, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
     Paint paint = new Paint();
     paint.setAntiAlias(true);
     paint.setShader(shader);
@@ -560,11 +550,9 @@ public final class TransformationUtils {
     } finally {
       BITMAP_DRAWABLE_LOCK.unlock();
     }
-
     if (!toTransform.equals(inBitmap)) {
       pool.put(toTransform);
     }
-
     return result;
   }
 

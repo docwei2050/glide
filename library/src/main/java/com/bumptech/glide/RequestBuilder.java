@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.ImageView;
 import androidx.annotation.CheckResult;
 import androidx.annotation.DrawableRes;
@@ -50,8 +51,7 @@ import java.util.concurrent.Executor;
  */
 // Public API.
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBuilder<TranscodeType>>
-    implements Cloneable, ModelTypes<RequestBuilder<TranscodeType>> {
+public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBuilder<TranscodeType>> implements Cloneable, ModelTypes<RequestBuilder<TranscodeType>> {
   // Used in generated subclasses
   protected static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions()
@@ -720,6 +720,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     Request request = buildRequest(target, targetListener, options, callbackExecutor);
 
     Request previous = target.getRequest();
+    Log.e("test","request.isEquivalentTo(previous----->)previous--->"+previous);
     if (request.isEquivalentTo(previous)
         && !isSkipMemoryCacheWithCompletePreviousRequest(options, previous)) {
       // If the request is completed, beginning again will ensure the result is re-delivered,
@@ -796,8 +797,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       }
     }
 
-    return into(
-        glideContext.buildImageViewTarget(view, transcodeClass),
+    return into(glideContext.buildImageViewTarget(view, transcodeClass),
         /*targetListener=*/ null,
         requestOptions,
         Executors.mainThreadExecutor());

@@ -70,6 +70,8 @@ public class RequestTracker {
     isOwnedByUs = pendingRequests.remove(request) || isOwnedByUs;
     if (isOwnedByUs) {
       request.clear();
+      Log.e("test","移除过请求request"+request);
+
     }
     return isOwnedByUs;
   }

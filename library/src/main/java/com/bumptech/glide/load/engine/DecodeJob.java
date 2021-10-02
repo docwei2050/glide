@@ -277,9 +277,11 @@ class DecodeJob<R>
         runGenerators();
         break;
       case SWITCH_TO_SOURCE_SERVICE:
+        Log.e("test","转成走远端-->SWITCH_TO_SOURCE_SERVICE");
         runGenerators();
         break;
       case DECODE_DATA:
+        Log.e("test","下载后开始解码数据");
         decodeFromRetrievedData();
         break;
       default:
@@ -311,7 +313,6 @@ class DecodeJob<R>
         && !(isStarted = currentGenerator.startNext())) {
       stage = getNextStage(stage);
       currentGenerator = getNextGenerator();
-
       if (stage == Stage.SOURCE) {
         reschedule();
         return;
@@ -351,15 +352,10 @@ class DecodeJob<R>
   private Stage getNextStage(Stage current) {
     switch (current) {
       case INITIALIZE:
-        return diskCacheStrategy.decodeCachedResource()
-            ? Stage.RESOURCE_CACHE
-            : getNextStage(Stage.RESOURCE_CACHE);
+        return diskCacheStrategy.decodeCachedResource() ? Stage.RESOURCE_CACHE : getNextStage(Stage.RESOURCE_CACHE);
       case RESOURCE_CACHE:
-        return diskCacheStrategy.decodeCachedData()
-            ? Stage.DATA_CACHE
-            : getNextStage(Stage.DATA_CACHE);
+        return diskCacheStrategy.decodeCachedData() ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);
       case DATA_CACHE:
-        // Skip loading from source if the user opted to only retrieve the resource from cache.
         return onlyRetrieveFromCache ? Stage.FINISHED : Stage.SOURCE;
       case SOURCE:
       case FINISHED:
@@ -438,7 +434,7 @@ class DecodeJob<R>
       runGenerators();
     }
   }
-
+  //resource就是bitmap
   private void notifyEncodeAndRelease(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     if (resource instanceof Initializable) {
@@ -457,6 +453,7 @@ class DecodeJob<R>
     stage = Stage.ENCODE;
     try {
       if (deferredEncodeManager.hasResourceToEncode()) {
+        Log.e("test","写入转换后的图片");
         deferredEncodeManager.encode(diskCacheProvider, options);
       }
     } finally {
@@ -571,10 +568,12 @@ class DecodeJob<R>
     if (!decoded.equals(transformed)) {
       decoded.recycle();
     }
-
+    //处理磁盘缓存策略的，之前下载到本地，没做任何判断，直接将源数据保存到本地了。
     final EncodeStrategy encodeStrategy;
     final ResourceEncoder<Z> encoder;
+    Log.e("test","decodeHelper.isResourceEncoderAvailable(transformed)-->"+(decodeHelper.isResourceEncoderAvailable(transformed)));
     if (decodeHelper.isResourceEncoderAvailable(transformed)) {
+      //返回的就是这个： EncodeStrategy.TRANSFORMED
       encoder = decodeHelper.getResultEncoder(transformed);
       encodeStrategy = encoder.getEncodeStrategy(options);
     } else {
@@ -584,12 +583,13 @@ class DecodeJob<R>
 
     Resource<Z> result = transformed;
     boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
-    if (diskCacheStrategy.isResourceCacheable(
-        isFromAlternateCacheKey, dataSource, encodeStrategy)) {
+    Log.e("test","encodeStrategy-策略不走了->"+diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource, encodeStrategy));
+    if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource, encodeStrategy)) {
       if (encoder == null) {
         throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
       }
       final Key key;
+      Log.e("test","encodeStrategy-策略是Source？？->"+(encodeStrategy==EncodeStrategy.SOURCE));
       switch (encodeStrategy) {
         case SOURCE:
           key = new DataCacheKey(currentSourceKey, signature);
@@ -611,6 +611,7 @@ class DecodeJob<R>
       }
 
       LockedResource<Z> lockedResult = LockedResource.obtain(transformed);
+      //这里只是获取要缓存到本地的key，deferred表示延迟
       deferredEncodeManager.init(key, encoder, lockedResult);
       result = lockedResult;
     }

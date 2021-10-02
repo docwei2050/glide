@@ -136,27 +136,10 @@ public class Glide implements ComponentCallbacks2 {
   @GuardedBy("this")
   @Nullable
   private BitmapPreFiller bitmapPreFiller;
-
-  /**
-   * Returns a directory with a default name in the private cache directory of the application to
-   * use to store retrieved media and thumbnails.
-   *
-   * @param context A context.
-   * @see #getPhotoCacheDir(android.content.Context, String)
-   */
   @Nullable
   public static File getPhotoCacheDir(@NonNull Context context) {
     return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
   }
-
-  /**
-   * Returns a directory with the given name in the private cache directory of the application to
-   * use to store retrieved media and thumbnails.
-   *
-   * @param context A context.
-   * @param cacheName The name of the subdirectory in which to store the cache.
-   * @see #getPhotoCacheDir(android.content.Context)
-   */
   @Nullable
   public static File getPhotoCacheDir(@NonNull Context context, @NonNull String cacheName) {
     File cacheDir = context.getCacheDir();
@@ -165,7 +148,6 @@ public class Glide implements ComponentCallbacks2 {
       if (result.isDirectory() || result.mkdirs()) {
         return result;
       }
-      // File wasn't able to create a directory, or the result exists but not a directory
       return null;
     }
     if (Log.isLoggable(TAG, Log.ERROR)) {
@@ -173,19 +155,10 @@ public class Glide implements ComponentCallbacks2 {
     }
     return null;
   }
-
-  /**
-   * Get the singleton.
-   *
-   * @return the singleton
-   */
-  @NonNull
-  // Double checked locking is safe here.
   @SuppressWarnings("GuardedBy")
   public static Glide get(@NonNull Context context) {
     if (glide == null) {
-      GeneratedAppGlideModule annotationGeneratedModule =
-          getAnnotationGeneratedGlideModules(context.getApplicationContext());
+      GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules(context.getApplicationContext());
       synchronized (Glide.class) {
         if (glide == null) {
           checkAndInitializeGlide(context, annotationGeneratedModule);
@@ -261,7 +234,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @GuardedBy("Glide.class")
-  private static void initializeGlide(
+  private static void  initializeGlide(
       @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
     initializeGlide(context, new GlideBuilder(), generatedAppGlideModule);
   }
@@ -277,34 +250,12 @@ public class Glide implements ComponentCallbacks2 {
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
       manifestModules = new ManifestParser(applicationContext).parse();
     }
-
-    if (annotationGeneratedModule != null
-        && !annotationGeneratedModule.getExcludedModuleClasses().isEmpty()) {
-      Set<Class<?>> excludedModuleClasses = annotationGeneratedModule.getExcludedModuleClasses();
-      Iterator<com.bumptech.glide.module.GlideModule> iterator = manifestModules.iterator();
-      while (iterator.hasNext()) {
-        com.bumptech.glide.module.GlideModule current = iterator.next();
-        if (!excludedModuleClasses.contains(current.getClass())) {
-          continue;
-        }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "AppGlideModule excludes manifest GlideModule: " + current);
-        }
-        iterator.remove();
-      }
-    }
-
-    if (Log.isLoggable(TAG, Log.DEBUG)) {
-      for (com.bumptech.glide.module.GlideModule glideModule : manifestModules) {
-        Log.d(TAG, "Discovered GlideModule from manifest: " + glideModule.getClass());
-      }
-    }
-
+    //排除的LibraryGlideModule有啥子用哦
     RequestManagerRetriever.RequestManagerFactory factory =
-        annotationGeneratedModule != null
-            ? annotationGeneratedModule.getRequestManagerFactory()
-            : null;
+        annotationGeneratedModule != null ? annotationGeneratedModule.getRequestManagerFactory() : null;
+    //设置请求的factory
     builder.setRequestManagerFactory(factory);
+
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
       module.applyOptions(applicationContext, builder);
     }
@@ -326,8 +277,10 @@ public class Glide implements ComponentCallbacks2 {
       }
     }
     if (annotationGeneratedModule != null) {
+      //已经将okhttp factory加入进入了
       annotationGeneratedModule.registerComponents(applicationContext, glide, glide.registry);
     }
+    //glide感知application的生命周期
     applicationContext.registerComponentCallbacks(glide);
     Glide.glide = glide;
   }
@@ -337,11 +290,8 @@ public class Glide implements ComponentCallbacks2 {
   private static GeneratedAppGlideModule getAnnotationGeneratedGlideModules(Context context) {
     GeneratedAppGlideModule result = null;
     try {
-      Class<GeneratedAppGlideModule> clazz =
-          (Class<GeneratedAppGlideModule>)
-              Class.forName("com.bumptech.glide.GeneratedAppGlideModuleImpl");
-      result =
-          clazz.getDeclaredConstructor(Context.class).newInstance(context.getApplicationContext());
+      Class<GeneratedAppGlideModule> clazz = (Class<GeneratedAppGlideModule>) Class.forName("com.bumptech.glide.GeneratedAppGlideModuleImpl");
+      result = clazz.getDeclaredConstructor(Context.class).newInstance(context.getApplicationContext());
     } catch (ClassNotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(
@@ -406,18 +356,22 @@ public class Glide implements ComponentCallbacks2 {
 
     List<ImageHeaderParser> imageHeaderParsers = registry.getImageHeaderParsers();
 
+
     ByteBufferGifDecoder byteBufferGifDecoder =
         new ByteBufferGifDecoder(context, imageHeaderParsers, bitmapPool, arrayPool);
+
     ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorVideoDecoder =
         VideoDecoder.parcel(bitmapPool);
 
-    // TODO(judds): Make ParcelFileDescriptorBitmapDecoder work with ImageDecoder.
+   //采样
     Downsampler downsampler =
         new Downsampler(
             registry.getImageHeaderParsers(), resources.getDisplayMetrics(), bitmapPool, arrayPool);
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
+
+   //两个解码器--bytebuffer转成bitmap
     if (experiments.isEnabled(EnableImageDecoderForBitmaps.class)
         && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       streamBitmapDecoder = new InputStreamBitmapImageDecoderResourceDecoder();
@@ -426,22 +380,26 @@ public class Glide implements ComponentCallbacks2 {
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
       streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
     }
-
     ResourceDrawableDecoder resourceDrawableDecoder = new ResourceDrawableDecoder(context);
-    ResourceLoader.StreamFactory resourceLoaderStreamFactory =
-        new ResourceLoader.StreamFactory(resources);
+
+    ResourceLoader.StreamFactory resourceLoaderStreamFactory = new ResourceLoader.StreamFactory(resources);
+
     ResourceLoader.UriFactory resourceLoaderUriFactory = new ResourceLoader.UriFactory(resources);
-    ResourceLoader.FileDescriptorFactory resourceLoaderFileDescriptorFactory =
-        new ResourceLoader.FileDescriptorFactory(resources);
-    ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory =
-        new ResourceLoader.AssetFileDescriptorFactory(resources);
+    ResourceLoader.FileDescriptorFactory resourceLoaderFileDescriptorFactory = new ResourceLoader.FileDescriptorFactory(resources);
+    ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory = new ResourceLoader.AssetFileDescriptorFactory(resources);
+
+
     BitmapEncoder bitmapEncoder = new BitmapEncoder(arrayPool);
 
+    //就是bitmap转成字节
     BitmapBytesTranscoder bitmapBytesTranscoder = new BitmapBytesTranscoder();
+    //将Gif转成字节
     GifDrawableBytesTranscoder gifDrawableBytesTranscoder = new GifDrawableBytesTranscoder();
 
     ContentResolver contentResolver = context.getContentResolver();
 
+
+    //ByteBufferEncoder就是字节缓冲数据写入到文件  流文件写入文件
     registry
         .append(ByteBuffer.class, new ByteBufferEncoder())
         .append(InputStream.class, new StreamEncoder(arrayPool))
@@ -454,6 +412,7 @@ public class Glide implements ComponentCallbacks2 {
           Registry.BUCKET_BITMAP,
           ParcelFileDescriptor.class,
           Bitmap.class,
+
           new ParcelFileDescriptorBitmapDecoder(downsampler));
     }
 

@@ -844,6 +844,7 @@ public class StandardGifDecoder implements GifDecoder {
   private Bitmap getNextBitmap() {
     Bitmap.Config config = isFirstFrameTransparent == null || isFirstFrameTransparent
         ? Bitmap.Config.ARGB_8888 : bitmapConfig;
+    //为啥GIf图不用inBitmap呢，不是更好吗？？？
     Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, config);
     result.setHasAlpha(true);
     return result;

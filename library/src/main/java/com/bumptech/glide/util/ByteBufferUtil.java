@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +41,8 @@ public final class ByteBufferUtil {
 
       raf = new RandomAccessFile(file, "r");
       channel = raf.getChannel();
+      //从本地文件读取使用FileChannel,映射直接缓冲区
+      Log.e("test","从本地文件读取使用FileChannel,映射直接缓冲区");
       return channel.map(FileChannel.MapMode.READ_ONLY, 0, fileLength).load();
     } finally {
       if (channel != null) {

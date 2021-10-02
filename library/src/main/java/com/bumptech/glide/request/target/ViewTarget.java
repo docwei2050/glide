@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
@@ -495,7 +496,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       return size > 0 || size == SIZE_ORIGINAL;
     }
 
-    private static final class SizeDeterminerLayoutListener
+    private static class SizeDeterminerLayoutListener
         implements ViewTreeObserver.OnPreDrawListener {
       private final WeakReference<SizeDeterminer> sizeDeterminerRef;
 

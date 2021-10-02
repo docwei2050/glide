@@ -174,17 +174,9 @@ public class Engine
       Executor callbackExecutor) {
     long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
 
-    EngineKey key =
-        keyFactory.buildKey(
-            model,
-            signature,
-            width,
-            height,
-            transformations,
-            resourceClass,
-            transcodeClass,
-            options);
-
+    EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations, resourceClass, transcodeClass, options);
+   // Log.e("test",key.toString());
+    //https://t7.baidu.com/it/u=91673060,7145840&fm=193&f=GIF
     EngineResource<?> memoryResource;
     synchronized (this) {
       memoryResource = loadFromMemory(key, isMemoryCacheable, startTime);
@@ -244,7 +236,7 @@ public class Engine
       Executor callbackExecutor,
       EngineKey key,
       long startTime) {
-
+   // Log.e("test","key--->"+key);
     EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
     if (current != null) {
       current.addCallback(cb, callbackExecutor);
@@ -373,6 +365,7 @@ public class Engine
     // A null resource indicates that the load failed, usually due to an exception.
     if (resource != null && resource.isMemoryCacheable()) {
       activeResources.activate(key, resource);
+      //此时加入弱引用缓存中
     }
 
     jobs.removeIfCurrent(key, engineJob);
@@ -390,11 +383,20 @@ public class Engine
     resourceRecycler.recycle(resource, /*forceNextFrame=*/ true);
   }
 
+
   @Override
   public void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
+    try {
+      throw new Exception("准备干掉弱引用添加到LruCache中");
+    } catch (Exception e) {
+      Log.e("test","message-->",e);
+    }
+    //资源释放的时候，就清空弱引用先将它放入队列里面的
     activeResources.deactivate(cacheKey);
     if (resource.isMemoryCacheable()) {
+      //资源释放的时候，弱引用清楚，此时Lru缓存加入进去
       cache.put(cacheKey, resource);
+      Log.e("test","加入到LruCache-->"+cacheKey.toString());
     } else {
       resourceRecycler.recycle(resource, /*forceNextFrame=*/ false);
     }

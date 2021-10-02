@@ -255,6 +255,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
 
       if ((status == Status.RUNNING || status == Status.WAITING_FOR_SIZE)
           && canNotifyStatusChanged()) {
+        Log.e("test","开始加载占位图");
         target.onLoadStarted(getPlaceholderDrawable());
       }
       if (IS_VERBOSE_LOGGABLE) {

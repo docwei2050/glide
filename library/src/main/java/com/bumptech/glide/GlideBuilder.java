@@ -531,6 +531,7 @@ public final class GlideBuilder {
     }
 
     if (memoryCache == null) {
+      Log.e("test","LruCache池的大小--》"+memorySizeCalculator.getMemoryCacheSize());
       memoryCache = new LruResourceCache(memorySizeCalculator.getMemoryCacheSize());
     }
 

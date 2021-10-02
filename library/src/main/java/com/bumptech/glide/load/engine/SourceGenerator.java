@@ -41,9 +41,11 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
 
   @Override
   public boolean startNext() {
+
     if (dataToCache != null) {
       Object data = dataToCache;
       dataToCache = null;
+
       cacheData(data);
     }
 
@@ -54,8 +56,10 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
 
     loadData = null;
     boolean started = false;
+
     while (!started && hasNextModelLoader()) {
       loadData = helper.getLoadData().get(loadDataListIndex++);
+      Log.e("test","loadData sourceEnerator");
       if (loadData != null
           && (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())
               || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
@@ -67,6 +71,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   }
 
   private void startNextLoad(final LoadData<?> toStart) {
+    Log.e("test","抓取数据");
     loadData.fetcher.loadData(
         helper.getPriority(),
         new DataCallback<Object>() {
@@ -74,6 +79,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
           public void onDataReady(@Nullable Object data) {
             if (isCurrentRequest(toStart)) {
               onDataReadyInternal(toStart, data);
+
             }
           }
 
@@ -99,6 +105,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   }
 
   private void cacheData(Object dataToCache) {
+
     long startTime = LogTime.getLogTime();
     try {
       Encoder<Object> encoder = helper.getSourceEncoder(dataToCache);
@@ -106,6 +113,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
           new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
       originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
       helper.getDiskCache().put(originalKey, writer);
+      Log.e("test","缓存数据到disk-->"+loadData.sourceKey);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(
             TAG,
@@ -143,6 +151,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should
       // reschedule to get back onto Glide's thread.
+      Log.e("test","走两次干嘛--第二次是为了保存到disk，第一次是为了获取data");
       cb.reschedule();
     } else {
       cb.onDataFetcherReady(
